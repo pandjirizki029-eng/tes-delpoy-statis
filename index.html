@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello Monday — Digital Creative Studio & Product Lab</title>
+    <meta name="description" content="Hello Monday is a creative studio crafting digital experiences, brand products, and playful technology that make every day feel like Friday.">
+    <meta name="keywords" content="Hello Monday, digital agency, creative studio, UI/UX design, interactive experiences, web development, creative tech">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👋</text></svg>">
+    
+    <!-- Google Fonts: Syne + Plus Jakarta Sans + Playfair Display Italic + JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@1,500;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="custom-cursor-enabled">
+
+    <!-- Interactive Custom Cursor -->
+    <div id="cursor-dot" class="cursor-dot" aria-hidden="true"></div>
+    <div id="cursor-follower" class="cursor-follower" aria-hidden="true">
+        <span id="cursor-text" class="cursor-text"></span>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+    <!-- Top Announcement Bar -->
+    <aside class="top-banner" aria-label="Studio Announcement">
+        <div class="banner-inner">
+            <span class="live-pulse"></span>
+            <span class="banner-text">Awarded Studio of the Year 2026 &bull; Now accepting Q4 collaboration inquiries</span>
+            <button type="button" id="banner-contact-btn" class="banner-action-link" data-cursor="CLICK">Let's talk &rarr;</button>
+        </div>
+    </aside>
+
+    <!-- Global Navigation Header -->
+    <header id="site-header" class="site-header">
+        <div class="header-container">
+            <!-- Studio Brand Logo -->
+            <a href="#" class="brand-logo" id="brand-logo" data-cursor="HELLO" aria-label="Hello Monday Homepage">
+                <span class="logo-mark">HM</span>
+                <span class="logo-text">hello monday<span class="logo-dot">.</span></span>
+            </a>
+
+            <!-- Studio Live Clocks & Status -->
+            <div class="header-locations hide-mobile">
+                <div class="location-item" title="Copenhagen Studio">
+                    <span class="loc-code">CPH</span>
+                    <span class="loc-time" id="time-cph">14:00</span>
+                </div>
+                <div class="location-item" title="New York Studio">
+                    <span class="loc-code">NYC</span>
+                    <span class="loc-time" id="time-nyc">08:00</span>
+                </div>
+                <div class="location-item" title="Jakarta Studio">
+                    <span class="loc-code">JKT</span>
+                    <span class="loc-time" id="time-jkt">19:00</span>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="desktop-nav" id="desktop-nav" aria-label="Main Navigation">
+                <ul class="nav-list">
+                    <li><a href="#work-section" class="nav-link active" data-cursor="VIEW">Work <span class="nav-badge">08</span></a></li>
+                    <li><a href="#about-section" class="nav-link" data-cursor="EXPLORE">About</a></li>
+                    <li><a href="#services-section" class="nav-link" data-cursor="EXPLORE">Services</a></li>
+                    <li><a href="#lab-section" class="nav-link" data-cursor="PLAY">Lab &amp; Play</a></li>
+                </ul>
+            </nav>
+
+            <!-- Utility Controls -->
+            <div class="header-actions">
+                <!-- Sound Toggle -->
+                <button type="button" id="sound-toggle-btn" class="utility-btn sound-btn" aria-label="Toggle Sound Effects" title="Toggle Sound FX" data-cursor="SOUND">
+                    <svg class="icon sound-icon-on" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    </svg>
+                    <svg class="icon sound-icon-off" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <line x1="23" y1="9" x2="17" y2="15"></line>
+                        <line x1="17" y1="9" x2="23" y2="15"></line>
+                    </svg>
+                </button>
+
+                <!-- Theme Toggle Button -->
+                <button type="button" id="theme-toggle-btn" class="utility-btn theme-btn" aria-label="Toggle Dark / Light Mode" title="Toggle Dark/Light Mode" data-cursor="MOOD">
+                    <span class="theme-icon sun-icon">☀️</span>
+                    <span class="theme-icon moon-icon">🌙</span>
+                </button>
+
+                <!-- CTA Button -->
+                <button type="button" id="header-contact-btn" class="btn btn-primary btn-sm" data-cursor="CLICK">
+                    <span>Say Hello</span>
+                    <span class="btn-arrow">&rarr;</span>
+                </button>
+
+                <!-- Mobile Menu Trigger -->
+                <button type="button" id="mobile-menu-btn" class="mobile-toggle" aria-label="Toggle Menu" aria-expanded="false" data-cursor="MENU">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Drawer Menu -->
+        <div id="mobile-menu-drawer" class="mobile-menu-drawer" aria-hidden="true">
+            <div class="mobile-menu-inner">
+                <nav class="mobile-nav" aria-label="Mobile Navigation">
+                    <a href="#work-section" class="mobile-nav-link" data-close-menu>Work <span class="mob-counter">08</span></a>
+                    <a href="#about-section" class="mobile-nav-link" data-close-menu>About Studio</a>
+                    <a href="#services-section" class="mobile-nav-link" data-close-menu>Capabilities</a>
+                    <a href="#lab-section" class="mobile-nav-link" data-close-menu>Playground &amp; Lab</a>
+                    <a href="#contact-section" class="mobile-nav-link" data-close-menu>Get in Touch</a>
+                </nav>
+                <div class="mobile-menu-footer">
+                    <div class="mobile-email">
+                        <span class="label">New Business</span>
+                        <a href="mailto:hello@monday.design">hello@monday.design</a>
+                    </div>
+                    <div class="mobile-locations">
+                        <span>Copenhagen &bull; New York &bull; Jakarta</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main id="main-content">
+
+        <!-- ========================================================
+             HERO SECTION: Bold Editorial + Interactive Canvas
+             ======================================================== -->
+        <section id="hero-section" class="hero-section" aria-labelledby="hero-title">
+            <!-- Background Interactive Canvas -->
+            <canvas id="hero-canvas" class="hero-canvas" aria-hidden="true"></canvas>
+
+            <div class="hero-container">
+                <div class="hero-meta-row">
+                    <div class="hero-tag">
+                        <span class="badge-dot"></span>
+                        <span class="tag-text">Independent Creative Studio</span>
+                    </div>
+                    <div class="hero-mood-selector">
+                        <span class="mood-label">Experience Mood:</span>
+                        <div class="mood-pills" id="mood-pill-group">
+                            <button type="button" class="mood-pill active" data-mood="playful" data-cursor="SELECT">Playful</button>
+                            <button type="button" class="mood-pill" data-mood="minimal" data-cursor="SELECT">Minimal</button>
+                            <button type="button" class="mood-pill" data-mood="electric" data-cursor="SELECT">Electric</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-main-typography">
+                    <h1 id="hero-title" class="hero-headline">
+                        <span class="line-wrap"><span class="reveal-text">We make digital</span></span>
+                        <span class="line-wrap">
+                            <span class="reveal-text highlight-container">
+                                ideas &amp; products
+                                <svg class="brush-stroke" viewBox="0 0 320 28" fill="none" preserveAspectRatio="none">
+                                    <path d="M4 22 C70 4, 180 3, 316 18" stroke="var(--color-accent)" stroke-width="8" stroke-linecap="round" opacity="0.45" />
+                                </svg>
+                            </span>
+                        </span>
+                        <span class="line-wrap">
+                            <span class="reveal-text text-serif-italic">people actually love.</span>
+                        </span>
+                    </h1>
+                </div>
+
+                <div class="hero-footer-row">
+                    <div class="hero-statement">
+                        <p>
+                            Hello Monday creates human-centric digital experiences, brand identities, and interactive technology that turn mundane interactions into everyday joy.
+                        </p>
+                    </div>
+                    
+                    <div class="hero-actions">
+                        <a href="#work-section" class="btn btn-primary btn-lg" id="explore-work-btn" data-cursor="DISCOVER">
+                            <span>Explore Projects</span>
+                            <span class="btn-arrow">&darr;</span>
+                        </a>
+                        <button type="button" class="btn btn-secondary btn-lg" id="quick-reel-btn" data-cursor="PLAY">
+                            <span class="play-icon-circle">&#9658;</span>
+                            <span>Interactive Lab</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Floating Stats Strip -->
+                <div class="hero-metrics-strip">
+                    <div class="metric-item">
+                        <span class="metric-num" data-count="18">0</span><span class="metric-suffix">+</span>
+                        <span class="metric-desc">Years of Craft</span>
+                    </div>
+                    <div class="metric-divider"></div>
+                    <div class="metric-item">
+                        <span class="metric-num" data-count="142">0</span><span class="metric-suffix"></span>
+                        <span class="metric-desc">FWA &amp; Awwwards</span>
+                    </div>
+                    <div class="metric-divider"></div>
+                    <div class="metric-item">
+                        <span class="metric-num" data-count="99">0</span><span class="metric-suffix">%</span>
+                        <span class="metric-desc">Client Retention</span>
+                    </div>
+                    <div class="metric-divider"></div>
+                    <div class="metric-item">
+                        <span class="metric-num" data-count="24">0</span><span class="metric-suffix">M+</span>
+                        <span class="metric-desc">Monthly Users Reached</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scroll Indicator -->
+            <div class="scroll-down-hint">
+                <a href="#work-section" class="scroll-pill" data-cursor="SCROLL" aria-label="Scroll to projects">
+                    <span class="mouse-icon">
+                        <span class="mouse-wheel"></span>
+                    </span>
+                    <span class="scroll-text">Scroll to explore</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- ========================================================
+             CLIENT MARQUEE STRIP
+             ======================================================== -->
+        <section class="clients-ticker-section" aria-label="Trusted Clients">
+            <div class="ticker-header-bar">
+                <span class="ticker-label">COLLABORATING WITH AMBITIOUS BRANDS GLOBALLY</span>
+            </div>
+            <div class="ticker-container" id="client-marquee">
+                <div class="ticker-track">
+                    <span class="ticker-item">GOOGLE</span>
+                    <span class="ticker-bullet">&bull;</span>
+                    <span class="ticker-item">YOUTUBE</span>
+                    <span class="ticker-bullet">&bull;</span>
+                    <span class="ticker-item">LEGO GROUP</span>
+                    <span class="ticker-bullet">&bull;</span>
+                    <span class="ticker-item">SPOTIFY</span>
+                    <span class="ticker-bullet">&bull;</span>
+                    <span class="ticker-item">NATIONAL GEOGRAPHIC</span>
+                    <span class="ticker-bullet">&bull;</span>
+                    <span class="ticker-item">NASA JET PROPULSION</span>
+                    <span class="ticker-bullet">&bull;</span>
+                    <span class="ticker-item">MoMA NYC</span>
+                    <span class="ticker-bullet">&bull;</span>
+                    <span class="ticker-item">SONY MUSIC</span>
+                    <span class="ticker-bullet">&bull;</span>
+                    <!-- Duplicate for infinite seamless scroll -->
+                    <span class="ticker-item">GOOGLE</span>
+                    <span class="ticker-bullet">&bull;</span>
+                    <span class="ticker-item">YOUTUBE</span>
+                    <span class="ticker-bullet">&bull;</span>
+                    <span class="ticker-item">LEGO GROUP</span>
+                    <span class="ticker-bullet">&bull;</span>
+                    <span class="ticker-item">SPOTIFY</span>
+                    <span class="ticker-bullet">&bull;</span>
+                    <span class="ticker-item">NATIONAL GEOGRAPHIC</span>
+                    <span class="ticker-bullet">&bull;</span>
+                    <span class="ticker-item">NASA JET PROPULSION</span>
+                    <span class="ticker-bullet">&bull;</span>
+                    <span class="ticker-item">MoMA NYC</span>
+                    <span class="ticker-bullet">&bull;</span>
+                    <span class="ticker-item">SONY MUSIC</span>
+                    <span class="ticker-bullet">&bull;</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================
+             SELECTED WORK SECTION: Filterable, Grid/List Mode
+             ======================================================== -->
+        <section id="work-section" class="work-section" aria-labelledby="work-title">
+            <div class="section-container">
+                <div class="section-top-bar">
+                    <div>
+                        <span class="section-subtitle">SELECTED WORK (2024 &mdash; 2026)</span>
+                        <h2 id="work-title" class="section-title">Crafted with Heart, Code &amp; Curiosity.</h2>
+                    </div>
+
+                    <!-- Search Input -->
+                    <div class="search-box-wrap">
+                        <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" id="project-search-input" class="search-input" placeholder="Search case studies..." aria-label="Search Projects">
+                        <button type="button" id="clear-search-btn" class="clear-btn" aria-label="Clear search" style="display:none;">&times;</button>
+                    </div>
+                </div>
+
+                <!-- Controls: Category Pills & View Switcher -->
+                <div class="work-controls-bar">
+                    <div class="category-filters" id="category-filter-group" role="tablist">
+                        <button type="button" class="filter-pill active" data-category="all" role="tab" aria-selected="true" data-cursor="FILTER">All Work <span class="filter-count">(6)</span></button>
+                        <button type="button" class="filter-pill" data-category="product" role="tab" aria-selected="false" data-cursor="FILTER">Digital Products <span class="filter-count">(2)</span></button>
+                        <button type="button" class="filter-pill" data-category="brand" role="tab" aria-selected="false" data-cursor="FILTER">Brand Systems <span class="filter-count">(2)</span></button>
+                        <button type="button" class="filter-pill" data-category="experiential" role="tab" aria-selected="false" data-cursor="FILTER">3D &amp; Experiential <span class="filter-count">(2)</span></button>
+                    </div>
+
+                    <div class="view-toggles" id="view-mode-group">
+                        <button type="button" id="grid-view-btn" class="view-btn active" title="Grid Layout" aria-label="Grid Layout" data-cursor="VIEW">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                                <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+                                <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+                                <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+                                <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+                            </svg>
+                        </button>
+                        <button type="button" id="list-view-btn" class="view-btn" title="Editorial List Layout" aria-label="List Layout" data-cursor="VIEW">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                                <line x1="4" y1="6" x2="20" y2="6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"></line>
+                                <line x1="4" y1="12" x2="20" y2="12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"></line>
+                                <line x1="4" y1="18" x2="20" y2="18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Projects Grid View Container -->
+                <div id="projects-grid" class="projects-grid-layout" aria-live="polite">
+                    <!-- Project 1: Luminaris -->
+                    <article class="project-card" data-category="product" data-id="luminaris" data-cursor="VIEW">
+                        <div class="card-visual-wrapper">
+                            <img src="assets/images/project-luminaris.jpg" alt="Luminaris Digital Workspace Platform mockup" class="card-image" loading="lazy">
+                            <div class="card-overlay-badge">Awarded Site of the Month</div>
+                            <button type="button" class="card-quickview-btn" data-project="luminaris" aria-label="Quick preview Luminaris">
+                                <span>Quick View</span>
+                                <span class="icon-expand">&#x2922;</span>
+                            </button>
+                        </div>
+                        <div class="card-details">
+                            <div class="card-meta">
+                                <span class="card-client">Luminaris AI</span>
+                                <span class="card-year">2026</span>
+                            </div>
+                            <h3 class="card-title">Transforming Creative Velocity through Spatial Canvas</h3>
+                            <div class="card-tags">
+                                <span class="tag">Digital Product</span>
+                                <span class="tag">Design System</span>
+                                <span class="tag">Web &amp; Mobile</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Project 2: Canvas 3D Museum -->
+                    <article class="project-card" data-category="experiential" data-id="canvas3d" data-cursor="VIEW">
+                        <div class="card-visual-wrapper">
+                            <img src="assets/images/project-canvas3d.jpg" alt="The Digital Canvas 3D virtual art museum" class="card-image" loading="lazy">
+                            <div class="card-overlay-badge">Awwwards SOTD</div>
+                            <button type="button" class="card-quickview-btn" data-project="canvas3d" aria-label="Quick preview The Digital Canvas">
+                                <span>Quick View</span>
+                                <span class="icon-expand">&#x2922;</span>
+                            </button>
+                        </div>
+                        <div class="card-details">
+                            <div class="card-meta">
+                                <span class="card-client">National Digital Arts Museum</span>
+                                <span class="card-year">2025</span>
+                            </div>
+                            <h3 class="card-title">The Digital Canvas: Immersive 3D Architectural Space</h3>
+                            <div class="card-tags">
+                                <span class="tag">3D Experiential</span>
+                                <span class="tag">WebGL</span>
+                                <span class="tag">Sound Design</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Project 3: Terra Eco-Innovation -->
+                    <article class="project-card" data-category="brand" data-id="terra" data-cursor="VIEW">
+                        <div class="card-visual-wrapper">
+                            <img src="assets/images/project-terra.jpg" alt="Terra Eco-friendly goods branding and store" class="card-image" loading="lazy">
+                            <div class="card-overlay-badge">Brand Identity</div>
+                            <button type="button" class="card-quickview-btn" data-project="terra" aria-label="Quick preview Terra Goods">
+                                <span>Quick View</span>
+                                <span class="icon-expand">&#x2922;</span>
+                            </button>
+                        </div>
+                        <div class="card-details">
+                            <div class="card-meta">
+                                <span class="card-client">Terra Living Labs</span>
+                                <span class="card-year">2025</span>
+                            </div>
+                            <h3 class="card-title">Terra: Playfully Crafted Sustainable Living Goods</h3>
+                            <div class="card-tags">
+                                <span class="tag">Brand Identity</span>
+                                <span class="tag">E-Commerce</span>
+                                <span class="tag">Art Direction</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Project 4: Orbit Kinematics (Generative Artwork) -->
+                    <article class="project-card" data-category="experiential" data-id="orbit" data-cursor="VIEW">
+                        <div class="card-visual-wrapper generative-art-wrapper orbit-art">
+                            <div class="generative-badge">Live Interactive Shader</div>
+                            <div class="art-visual-center">
+                                <div class="orbit-rings">
+                                    <span class="ring ring-1"></span>
+                                    <span class="ring ring-2"></span>
+                                    <span class="ring ring-3"></span>
+                                    <span class="core-node"></span>
+                                </div>
+                            </div>
+                            <button type="button" class="card-quickview-btn" data-project="orbit" aria-label="Quick preview Orbit Kinematics">
+                                <span>Quick View</span>
+                                <span class="icon-expand">&#x2922;</span>
+                            </button>
+                        </div>
+                        <div class="card-details">
+                            <div class="card-meta">
+                                <span class="card-client">Copenhagen Astrophysics Inst.</span>
+                                <span class="card-year">2026</span>
+                            </div>
+                            <h3 class="card-title">Orbit Kinematics: Gravitational Wave Sonification</h3>
+                            <div class="card-tags">
+                                <span class="tag">3D Experiential</span>
+                                <span class="tag">Creative Tech</span>
+                                <span class="tag">Data Art</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Project 5: Studio Hyperion (Productivity App) -->
+                    <article class="project-card" data-category="product" data-id="hyperion" data-cursor="VIEW">
+                        <div class="card-visual-wrapper generative-art-wrapper hyperion-art">
+                            <div class="generative-badge">Next-Gen SaaS</div>
+                            <div class="mockup-ui-preview">
+                                <div class="mockup-glass-card">
+                                    <div class="mockup-pill-bar">
+                                        <span class="pill-dot red"></span>
+                                        <span class="pill-dot yellow"></span>
+                                        <span class="pill-dot green"></span>
+                                    </div>
+                                    <div class="mockup-lines">
+                                        <span class="line-h l1"></span>
+                                        <span class="line-h l2"></span>
+                                        <span class="line-h l3"></span>
+                                    </div>
+                                    <div class="mockup-metrics">
+                                        <div class="bar-chart"><span style="height:60%"></span><span style="height:85%"></span><span style="height:45%"></span><span style="height:100%"></span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="card-quickview-btn" data-project="hyperion" aria-label="Quick preview Studio Hyperion">
+                                <span>Quick View</span>
+                                <span class="icon-expand">&#x2922;</span>
+                            </button>
+                        </div>
+                        <div class="card-details">
+                            <div class="card-meta">
+                                <span class="card-client">Hyperion OS</span>
+                                <span class="card-year">2025</span>
+                            </div>
+                            <h3 class="card-title">Hyperion: Cognitive Work OS for Distributed Teams</h3>
+                            <div class="card-tags">
+                                <span class="tag">Digital Product</span>
+                                <span class="tag">Desktop App</span>
+                                <span class="tag">UX Architecture</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Project 6: Nordic Type Foundry (Brand & Typography) -->
+                    <article class="project-card" data-category="brand" data-id="nordic" data-cursor="VIEW">
+                        <div class="card-visual-wrapper generative-art-wrapper nordic-art">
+                            <div class="generative-badge">Editorial &amp; Type</div>
+                            <div class="editorial-type-showcase">
+                                <span class="big-glyph">Aa</span>
+                                <span class="type-specimen">SYNE &bull; MONO &bull; GROTESK</span>
+                            </div>
+                            <button type="button" class="card-quickview-btn" data-project="nordic" aria-label="Quick preview Nordic Type">
+                                <span>Quick View</span>
+                                <span class="icon-expand">&#x2922;</span>
+                            </button>
+                        </div>
+                        <div class="card-details">
+                            <div class="card-meta">
+                                <span class="card-client">København Type Foundry</span>
+                                <span class="card-year">2024</span>
+                            </div>
+                            <h3 class="card-title">Nordic Letters: Variable Typographic Specimen Studio</h3>
+                            <div class="card-tags">
+                                <span class="tag">Brand Systems</span>
+                                <span class="tag">Typography</span>
+                                <span class="tag">Interactive Specimen</span>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+
+                <!-- Projects List View Container (Hidden by default, activated via switcher) -->
+                <div id="projects-list" class="projects-list-layout" style="display:none;" aria-live="polite">
+                    <div class="list-header-row">
+                        <span class="col-client">Client</span>
+                        <span class="col-title">Project Name</span>
+                        <span class="col-category">Discipline</span>
+                        <span class="col-year">Year</span>
+                        <span class="col-action">Explore</span>
+                    </div>
+                    <div class="list-items-group" id="list-items-group">
+                        <!-- Populated dynamic list items matching grid -->
+                    </div>
+                </div>
+
+                <!-- Empty State Message -->
+                <div id="no-results-msg" class="no-results-box" style="display: none;">
+                    <div class="no-results-icon">&#128269;</div>
+                    <p class="no-results-title">No projects found matching that filter</p>
+                    <p class="no-results-sub">Try searching for "digital", "brand", or reset the category filters.</p>
+                    <button type="button" id="reset-filters-btn" class="btn btn-secondary btn-sm" data-cursor="RESET">Reset Filters</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================
+             STUDIO ABOUT & MANIFESTO SECTION
+             ======================================================== -->
+        <section id="about-section" class="about-section" aria-labelledby="about-title">
+            <div class="section-container">
+                <div class="about-split-layout">
+                    <!-- Left: Sticky manifesto statement -->
+                    <div class="about-lead">
+                        <span class="section-subtitle">THE PHILOSOPHY</span>
+                        <h2 id="about-title" class="manifesto-headline">
+                            We believe digital things should feel human, delightful, and genuinely worth spending time with.
+                        </h2>
+                        <div class="founder-quote-card">
+                            <p class="quote-text">
+                                &ldquo;If a website doesn't make someone smile or breathe easier while accomplishing their goal, we haven't finished crafting it yet.&rdquo;
+                            </p>
+                            <div class="quote-author">
+                                <div class="author-avatar">HM</div>
+                                <div class="author-info">
+                                    <span class="name">Anders &amp; Johanne</span>
+                                    <span class="role">Design Directors, Hello Monday</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Story pillars & capabilities -->
+                    <div class="about-content">
+                        <div class="story-pillar">
+                            <div class="pillar-num">01</div>
+                            <div class="pillar-body">
+                                <h3>Playful Curiosity Meets Rigorous Craft</h3>
+                                <p>
+                                    Every project begins as a playful investigation: What if this button felt weightless? What if data visualization felt like looking at a star constellation? We combine this whimsy with production-grade engineering and scalable design systems.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="story-pillar">
+                            <div class="pillar-num">02</div>
+                            <div class="pillar-body">
+                                <h3>Bespoke Interaction Architecture</h3>
+                                <p>
+                                    Templates bore us. We build tailor-made digital engines with ultra-smooth 60fps micro-interactions, responsive fluid typography, and bespoke web shaders that leave an indelible memory on every visitor.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="story-pillar">
+                            <div class="pillar-num">03</div>
+                            <div class="pillar-body">
+                                <h3>Inclusive &amp; Ethical Technology</h3>
+                                <p>
+                                    High aesthetics never compromise accessibility. We adhere to strict WCAG 2.1 AA standards, semantic markup, keyboard navigability, and lightweight carbon-conscious performance.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================
+             SERVICES & CAPABILITIES ACCORDION
+             ======================================================== -->
+        <section id="services-section" class="services-section" aria-labelledby="services-title">
+            <div class="section-container">
+                <div class="section-top-bar">
+                    <div>
+                        <span class="section-subtitle">WHAT WE DO</span>
+                        <h2 id="services-title" class="section-title">End-to-End Creative Engineering.</h2>
+                    </div>
+                    <p class="section-lead-text">
+                        From ambitious startups to Fortune 50 iconic global brands, we provide full-spectrum digital craft.
+                    </p>
+                </div>
+
+                <div class="services-accordion" id="services-accordion">
+                    <!-- Service 1 -->
+                    <div class="accordion-item active" data-cursor="TOGGLE">
+                        <button type="button" class="accordion-header" aria-expanded="true" aria-controls="service-body-1">
+                            <span class="service-idx">01</span>
+                            <span class="service-name">Digital Product Design &amp; Architecture</span>
+                            <span class="service-toggle-icon">&minus;</span>
+                        </button>
+                        <div id="service-body-1" class="accordion-panel">
+                            <div class="accordion-panel-inner">
+                                <p>
+                                    We architect scalable web platforms, iOS/Android mobile ecosystems, and SaaS interfaces that turn complex data structures into effortless, elegant workflows.
+                                </p>
+                                <ul class="capability-pills">
+                                    <li>Design Systems &amp; Tokens</li>
+                                    <li>Rapid Interactive Prototyping</li>
+                                    <li>User Research &amp; Usability Labs</li>
+                                    <li>Cross-Platform App UI/UX</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service 2 -->
+                    <div class="accordion-item" data-cursor="TOGGLE">
+                        <button type="button" class="accordion-header" aria-expanded="false" aria-controls="service-body-2">
+                            <span class="service-idx">02</span>
+                            <span class="service-name">Brand Identity &amp; Digital Guidelines</span>
+                            <span class="service-toggle-icon">&#43;</span>
+                        </button>
+                        <div id="service-body-2" class="accordion-panel" hidden>
+                            <div class="accordion-panel-inner">
+                                <p>
+                                    Brands live in motion today. We sculpt holistic brand universes: custom typography, dynamic logomarks, color palettes, and motion guidelines tailored for the digital-first era.
+                                </p>
+                                <ul class="capability-pills">
+                                    <li>Generative Identity Systems</li>
+                                    <li>Custom Type Design &amp; Pairing</li>
+                                    <li>Motion &amp; Sound Identity</li>
+                                    <li>Brand Guidelines &amp; Assets</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service 3 -->
+                    <div class="accordion-item" data-cursor="TOGGLE">
+                        <button type="button" class="accordion-header" aria-expanded="false" aria-controls="service-body-3">
+                            <span class="service-idx">03</span>
+                            <span class="service-name">Creative Tech, 3D &amp; Spatial Web</span>
+                            <span class="service-toggle-icon">&#43;</span>
+                        </button>
+                        <div id="service-body-3" class="accordion-panel" hidden>
+                            <div class="accordion-panel-inner">
+                                <p>
+                                    Pushing web boundaries with WebGL shaders, Three.js 3D environments, physics simulations, sound design, and generative AI interfaces that captivate audiences.
+                                </p>
+                                <ul class="capability-pills">
+                                    <li>Interactive WebGL / 3D Canvas</li>
+                                    <li>Generative AI Workflows</li>
+                                    <li>Web Audio Synthesizers</li>
+                                    <li>Hardware &amp; Exhibition Displays</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service 4 -->
+                    <div class="accordion-item" data-cursor="TOGGLE">
+                        <button type="button" class="accordion-header" aria-expanded="false" aria-controls="service-body-4">
+                            <span class="service-idx">04</span>
+                            <span class="service-name">Frontend Craft &amp; Creative Engineering</span>
+                            <span class="service-toggle-icon">&#43;</span>
+                        </button>
+                        <div id="service-body-4" class="accordion-panel" hidden>
+                            <div class="accordion-panel-inner">
+                                <p>
+                                    Pixel-perfection meets resilient performance. Clean semantic code, buttery 60fps micro-animations, accessible interfaces, and headless CMS integrations.
+                                </p>
+                                <ul class="capability-pills">
+                                    <li>Next.js / Vanilla JS Performance</li>
+                                    <li>Fluid GSAP / Canvas Motion</li>
+                                    <li>Accessibility (WCAG 2.1 AA)</li>
+                                    <li>Headless Jamstack Architectures</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================
+             INTERACTIVE LAB & PLAYGROUND (Signature Hello Monday Experiment)
+             ======================================================== -->
+        <section id="lab-section" class="lab-section" aria-labelledby="lab-title">
+            <div class="section-container">
+                <div class="lab-intro-box">
+                    <span class="section-subtitle">THE LAB &amp; EXPERIMENTS</span>
+                    <h2 id="lab-title" class="section-title">Play is the Highest Form of Research.</h2>
+                    <p class="section-lead-text">
+                        Welcome to our internal sandbox. Click, hover, drag, and experiment with our real-time interactive sound synthesizer and kinetic typography toys.
+                    </p>
+                </div>
+
+                <div class="lab-interactive-grid">
+                    <!-- Interactive Toy 1: Generative Audio Synthesizer Pad -->
+                    <div class="lab-card soundboard-card">
+                        <div class="lab-card-header">
+                            <div>
+                                <span class="toy-tag">SYNTHESIZER LAB 01</span>
+                                <h3 class="toy-title">Pentatonic Harmonic Pad</h3>
+                            </div>
+                            <div class="synth-indicator">
+                                <span class="eq-bar"></span>
+                                <span class="eq-bar"></span>
+                                <span class="eq-bar"></span>
+                            </div>
+                        </div>
+                        <p class="toy-desc">Hover or click any pad node to trigger synthesized harmonic frequencies generated via Web Audio API.</p>
+                        
+                        <div class="synth-pads-grid" id="synth-pads-container">
+                            <button type="button" class="synth-pad" data-freq="261.63" data-note="C4" data-cursor="NOTE">
+                                <span class="note-name">C4</span>
+                                <span class="note-freq">261Hz</span>
+                            </button>
+                            <button type="button" class="synth-pad" data-freq="293.66" data-note="D4" data-cursor="NOTE">
+                                <span class="note-name">D4</span>
+                                <span class="note-freq">294Hz</span>
+                            </button>
+                            <button type="button" class="synth-pad" data-freq="329.63" data-note="E4" data-cursor="NOTE">
+                                <span class="note-name">E4</span>
+                                <span class="note-freq">330Hz</span>
+                            </button>
+                            <button type="button" class="synth-pad" data-freq="392.00" data-note="G4" data-cursor="NOTE">
+                                <span class="note-name">G4</span>
+                                <span class="note-freq">392Hz</span>
+                            </button>
+                            <button type="button" class="synth-pad" data-freq="440.00" data-note="A4" data-cursor="NOTE">
+                                <span class="note-name">A4</span>
+                                <span class="note-freq">440Hz</span>
+                            </button>
+                            <button type="button" class="synth-pad" data-freq="523.25" data-note="C5" data-cursor="NOTE">
+                                <span class="note-name">C5</span>
+                                <span class="note-freq">523Hz</span>
+                            </button>
+                            <button type="button" class="synth-pad" data-freq="587.33" data-note="D5" data-cursor="NOTE">
+                                <span class="note-name">D5</span>
+                                <span class="note-freq">587Hz</span>
+                            </button>
+                            <button type="button" class="synth-pad" data-freq="659.25" data-note="E5" data-cursor="NOTE">
+                                <span class="note-name">E5</span>
+                                <span class="note-freq">659Hz</span>
+                            </button>
+                        </div>
+
+                        <div class="synth-controls">
+                            <button type="button" id="synth-arpeggio-btn" class="btn btn-secondary btn-sm" data-cursor="PLAY">
+                                <span>&#9654; Play Arpeggio Chord</span>
+                            </button>
+                            <span class="active-note-readout" id="active-note-readout">Tone: Ready</span>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Toy 2: Kinetic Typography Playground -->
+                    <div class="lab-card typography-card">
+                        <div class="lab-card-header">
+                            <div>
+                                <span class="toy-tag">KINETIC LAB 02</span>
+                                <h3 class="toy-title">Interactive Monday Physics</h3>
+                            </div>
+                            <button type="button" id="shuffle-type-btn" class="utility-icon-btn" title="Scatter & Reset" data-cursor="SCATTER">
+                                &#x21bb;
+                            </button>
+                        </div>
+                        <p class="toy-desc">Drag or hover over individual glyphs below to watch responsive spring physics and playful bounce.</p>
+                        
+                        <div class="kinetic-letters-stage" id="kinetic-letters-stage">
+                            <span class="k-letter" data-cursor="BOUNCE" tabindex="0">H</span>
+                            <span class="k-letter" data-cursor="BOUNCE" tabindex="0">E</span>
+                            <span class="k-letter" data-cursor="BOUNCE" tabindex="0">L</span>
+                            <span class="k-letter" data-cursor="BOUNCE" tabindex="0">L</span>
+                            <span class="k-letter" data-cursor="BOUNCE" tabindex="0">O</span>
+                            <span class="k-spacer"></span>
+                            <span class="k-letter accent-letter" data-cursor="BOUNCE" tabindex="0">M</span>
+                            <span class="k-letter accent-letter" data-cursor="BOUNCE" tabindex="0">O</span>
+                            <span class="k-letter accent-letter" data-cursor="BOUNCE" tabindex="0">N</span>
+                            <span class="k-letter accent-letter" data-cursor="BOUNCE" tabindex="0">D</span>
+                            <span class="k-letter accent-letter" data-cursor="BOUNCE" tabindex="0">A</span>
+                            <span class="k-letter accent-letter" data-cursor="BOUNCE" tabindex="0">Y</span>
+                        </div>
+
+                        <div class="kinetic-controls">
+                            <div class="slider-control">
+                                <label for="weight-slider">Font Weight Variable:</label>
+                                <input type="range" id="weight-slider" min="400" max="800" value="700">
+                            </div>
+                            <div class="slider-control">
+                                <label for="tracking-slider">Letter Tracking:</label>
+                                <input type="range" id="tracking-slider" min="-5" max="30" value="5">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================
+             AWARDS & RECOGNITION TICKER
+             ======================================================== -->
+        <section class="awards-section" aria-label="Studio Recognition and Honors">
+            <div class="section-container">
+                <div class="awards-header">
+                    <span class="section-subtitle">INDUSTRY RECOGNITION</span>
+                    <h3 class="awards-title">Recognized by the World's Best Design Institutions</h3>
+                </div>
+
+                <div class="awards-grid">
+                    <div class="award-box">
+                        <span class="award-count">64&times;</span>
+                        <span class="award-name">FWA of the Day</span>
+                        <span class="award-sub">Favorite Website Awards</span>
+                    </div>
+                    <div class="award-box">
+                        <span class="award-count">48&times;</span>
+                        <span class="award-name">Awwwards SOTD</span>
+                        <span class="award-sub">Site of the Day / Year</span>
+                    </div>
+                    <div class="award-box">
+                        <span class="award-count">19&times;</span>
+                        <span class="award-name">Webby Awards</span>
+                        <span class="award-sub">Best Visual Design / UX</span>
+                    </div>
+                    <div class="award-box">
+                        <span class="award-count">11&times;</span>
+                        <span class="award-name">Cannes Lions</span>
+                        <span class="award-sub">Digital Craft Grand Prix</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================
+             CONTACT & FOOTER CTA SECTION ("Say Hello")
+             ======================================================== -->
+        <section id="contact-section" class="contact-section" aria-labelledby="contact-title">
+            <div class="section-container">
+                <div class="contact-cta-wrapper">
+                    <div class="contact-header-block">
+                        <span class="contact-mini-badge">START A COLLABORATION</span>
+                        <h2 id="contact-title" class="contact-headline">
+                            Have an idea? Let's make Monday feel like Friday.
+                        </h2>
+                        <p class="contact-subtext">
+                            Whether you need a world-class digital product, an interactive brand experience, or a bespoke technological experiment, our team is ready.
+                        </p>
+                        
+                        <div class="direct-email-wrap">
+                            <span class="email-label">Direct Line:</span>
+                            <a href="mailto:hello@monday.design" class="big-email-link" data-cursor="EMAIL">
+                                hello@monday.design
+                                <span class="email-arrow">&rarr;</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Quick Inquiry Form -->
+                    <div class="contact-form-box">
+                        <h3 class="form-title">Send a Quick Brief</h3>
+                        <form id="quick-inquiry-form" class="inquiry-form" novalidate>
+                            <div class="form-group">
+                                <label for="client-name">Your Name</label>
+                                <input type="text" id="client-name" name="name" required placeholder="e.g. Maya Lin" class="form-input">
+                                <span class="input-error" id="name-error">Please enter your name</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="client-email">Email Address</label>
+                                <input type="email" id="client-email" name="email" required placeholder="maya@brand.com" class="form-input">
+                                <span class="input-error" id="email-error">Please provide a valid email</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label>What are we creating together?</label>
+                                <div class="budget-pills-row" id="scope-pills-group">
+                                    <button type="button" class="scope-pill active" data-scope="Product">Digital Product</button>
+                                    <button type="button" class="scope-pill" data-scope="Brand">Branding</button>
+                                    <button type="button" class="scope-pill" data-scope="3D Experience">3D &amp; Tech</button>
+                                    <button type="button" class="scope-pill" data-scope="Complete Studio">Full Project</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="client-message">Project Vision / Details</label>
+                                <textarea id="client-message" name="message" rows="3" placeholder="Tell us about your brand timeline, objectives, or dreams..." class="form-textarea" required></textarea>
+                                <span class="input-error" id="msg-error">Please enter a few words about your project</span>
+                            </div>
+
+                            <button type="submit" id="submit-brief-btn" class="btn btn-primary btn-block" data-cursor="SEND">
+                                <span>Send Inquiry</span>
+                                <span class="btn-arrow">&rarr;</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Footer Bottom Meta -->
+                <footer class="site-footer">
+                    <div class="footer-top-row">
+                        <div class="footer-col brand-col">
+                            <span class="footer-logo">hello monday<span class="logo-dot">.</span></span>
+                            <p class="footer-motto">
+                                A proud member of DEPT&reg;. Crafting high-emotion digital journeys across continents since 2006.
+                            </p>
+                        </div>
+
+                        <div class="footer-col">
+                            <span class="col-heading">Studios</span>
+                            <ul class="footer-links">
+                                <li><strong>Copenhagen:</strong> Kronprinsessegade 34</li>
+                                <li><strong>New York:</strong> 132 Mulberry St, Soho</li>
+                                <li><strong>Jakarta:</strong> Senopati Creative Hub</li>
+                            </ul>
+                        </div>
+
+                        <div class="footer-col">
+                            <span class="col-heading">Socials</span>
+                            <ul class="footer-links horizontal-links">
+                                <li><a href="https://instagram.com" target="_blank" rel="noopener" data-cursor="LINK">Instagram</a></li>
+                                <li><a href="https://twitter.com" target="_blank" rel="noopener" data-cursor="LINK">X / Twitter</a></li>
+                                <li><a href="https://linkedin.com" target="_blank" rel="noopener" data-cursor="LINK">LinkedIn</a></li>
+                                <li><a href="https://github.com" target="_blank" rel="noopener" data-cursor="LINK">GitHub</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="footer-bottom-row">
+                        <p class="copyright">&copy; 2006 &mdash; 2026 Hello Monday. All Rights Reserved.</p>
+                        <div class="footer-legal-links">
+                            <a href="#about-section">Privacy Policy</a>
+                            <span class="bullet">&bull;</span>
+                            <a href="#about-section">Cookie Preferences</a>
+                            <span class="bullet">&bull;</span>
+                            <a href="#about-section">Accessibility Statement</a>
+                        </div>
+                    </div>
+                </footer>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ========================================================
+         CASE STUDY QUICK VIEW MODAL
+         ======================================================== -->
+    <div id="project-modal" class="project-modal-backdrop" aria-hidden="true" role="dialog" aria-modal="true">
+        <div class="modal-card">
+            <!-- Modal Close Button -->
+            <button type="button" id="modal-close-btn" class="modal-close-btn" aria-label="Close Case Study" data-cursor="CLOSE">
+                &times;
+            </button>
+
+            <div class="modal-scroll-body">
+                <div class="modal-header-section">
+                    <div class="modal-tag-row">
+                        <span id="modal-project-badge" class="modal-badge">CASE STUDY</span>
+                        <span id="modal-project-year" class="modal-year">2026</span>
+                    </div>
+                    <h2 id="modal-project-title" class="modal-title">Project Title</h2>
+                    <p id="modal-project-tagline" class="modal-tagline">Brief project summary description.</p>
+                </div>
+
+                <div class="modal-visual-hero">
+                    <img id="modal-project-image" src="" alt="Project Showcase Full Visual" class="modal-full-img">
+                </div>
+
+                <div class="modal-meta-grid">
+                    <div class="meta-box">
+                        <span class="meta-label">Client</span>
+                        <span id="modal-client-name" class="meta-val">Client Name</span>
+                    </div>
+                    <div class="meta-box">
+                        <span class="meta-label">Services</span>
+                        <span id="modal-services" class="meta-val">Product Design, Creative Tech</span>
+                    </div>
+                    <div class="meta-box">
+                        <span class="meta-label">Timeline</span>
+                        <span id="modal-timeline" class="meta-val">6 Months</span>
+                    </div>
+                    <div class="meta-box">
+                        <span class="meta-label">Impact</span>
+                        <span id="modal-impact" class="meta-val">+140% Conversion</span>
+                    </div>
+                </div>
+
+                <div class="modal-story-section">
+                    <h3>The Creative Challenge</h3>
+                    <p id="modal-challenge-text">
+                        Detailed exploration of the client's original state, the technological friction, and the human friction we set out to resolve.
+                    </p>
+
+                    <h3>Our Craft &amp; Solution</h3>
+                    <p id="modal-solution-text">
+                        How we sculpted an intuitive interface, designed interactive micro-moments, and engineered a high-performance web platform.
+                    </p>
+                </div>
+
+                <div class="modal-footer-cta">
+                    <button type="button" id="modal-contact-cta" class="btn btn-primary" data-cursor="CLICK">
+                        <span>Discuss Similar Project</span>
+                        <span class="btn-arrow">&rarr;</span>
+                    </button>
+                    <button type="button" id="modal-dismiss-btn" class="btn btn-secondary">
+                        Close Preview
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script File -->
+    <script src="script.js"></script>
+</body>
+</html>
