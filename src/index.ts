@@ -246,6 +246,58 @@ app.delete("/api/students/:id", async (req: Request, res: Response) => {
   }
 });
 
+// ==========================================
+// Rute Minggu 5 (Node.js + Express on Workers)
+// ==========================================
+
+// 1. Route Greeting Dasar (Bab 4 Minggu 5)
+app.get("/", (req: Request, res: Response) => {
+  res.json({
+    message: "Hello Express on Cloudflare Workers!",
+  });
+});
+
+// 2. Route Status API (Bab 4 Minggu 5)
+app.get("/api/status", (req: Request, res: Response) => {
+  res.json({
+    status: "ok",
+    subject: "PaaS",
+    week: 5,
+    platform: "Cloudflare Workers",
+  });
+});
+
+// 3. Route Info Redeploy (Bab 9 Challenge Redeploy Minggu 5)
+app.get("/api/info", (req: Request, res: Response) => {
+  res.json({
+    framework: "Express",
+    runtime: "Cloudflare Workers",
+    course: "Platform as a Service",
+  });
+});
+
+// 4. Route Log & Observability (Bab 10 Minggu 5)
+app.get("/api/log-test", (req: Request, res: Response) => {
+  console.log("Endpoint /api/log-test dipanggil");
+  res.json({
+    logged: true,
+  });
+});
+
+// 5. Route Challenge Pengayaan Minggu 5 (Bab 12)
+app.get("/api/time", (req: Request, res: Response) => {
+  res.json({
+    time: new Date().toISOString(),
+    timezone: "UTC",
+  });
+});
+
+app.get("/hello/:name", (req: Request, res: Response) => {
+  res.json({
+    message: `Hello, ${req.params.name}! Welcome to Express on Cloudflare Workers.`,
+  });
+});
+
 // 404 Handler for undefined API routes
 app.use("/api/*", (req: Request, res: Response) => {
   res.status(404).json({
