@@ -1,0 +1,26 @@
+{
+  "name": "paas-express-worker",
+  "version": "1.0.0",
+  "description": "Full-stack Dynamic Web Application with Express and Cloudflare D1 on Cloudflare Workers",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "migrate:local": "wrangler d1 migrations apply DB --local",
+    "migrate:remote": "wrangler d1 migrations apply DB --remote"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261013.1",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2",
+    "wrangler": "^4.149.0"
+  },
+  "overrides": {
+    "iconv-lite": "0.6.3"
+  }
+}

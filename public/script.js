@@ -1033,6 +1033,408 @@
     }
 
     /* --------------------------------------------------------------------------
+       16B. STUDENTS CRUD MODULE (CLOUDFLARE D1 + EXPRESS API)
+       -------------------------------------------------------------------------- */
+    function initStudentCrud() {
+        const tableBody = document.getElementById('students-table-body');
+        const emptyState = document.getElementById('students-empty-state');
+        const searchInput = document.getElementById('student-search-input');
+        const searchClear = document.getElementById('student-search-clear');
+        const refreshBtn = document.getElementById('btn-refresh-students');
+        const seedBtn = document.getElementById('btn-seed-students');
+        const emptySeedBtn = document.getElementById('btn-empty-seed');
+        const openAddBtn = document.getElementById('btn-open-add-student');
+        const emptyAddBtn = document.getElementById('btn-empty-add');
+        const countBadge = document.getElementById('students-count-badge');
+        const navBadge = document.getElementById('nav-student-badge');
+        const mobBadge = document.getElementById('mob-student-badge');
+        const statusDot = document.getElementById('d1-status-dot');
+        const statusText = document.getElementById('d1-status-text');
+
+        // Modal elements
+        const studentModal = document.getElementById('student-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalForm = document.getElementById('student-form');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+        const modalCancelBtn = document.getElementById('modal-cancel-btn');
+        const modalSubmitBtn = document.getElementById('modal-submit-btn');
+        const modalSubmitText = document.getElementById('modal-submit-text');
+        const studentIdField = document.getElementById('student-id-field');
+        const nameInput = document.getElementById('student-name');
+        const classNameInput = document.getElementById('student-class-name');
+
+        // Error message elements
+        const errorName = document.getElementById('error-name');
+        const errorClassName = document.getElementById('error-class-name');
+
+        // Delete Modal elements
+        const deleteModal = document.getElementById('delete-modal');
+        const deleteModalClose = document.getElementById('delete-modal-close');
+        const deleteCancelBtn = document.getElementById('delete-cancel-btn');
+        const deleteConfirmBtn = document.getElementById('delete-confirm-btn');
+        const deleteStudentName = document.getElementById('delete-student-name');
+        const deleteStudentClass = document.getElementById('delete-student-class');
+
+        let pendingDeleteId = null;
+        let searchTimeout = null;
+
+        // Health check
+        async function checkD1Health() {
+            try {
+                const res = await fetch('/api/health');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (statusDot) {
+                        statusDot.className = 'status-indicator-dot online';
+                    }
+                    if (statusText) {
+                        statusText.textContent = `D1 Online (${data.studentCount || 0} Mahasiswa)`;
+                    }
+                } else {
+                    throw new Error('D1 Offline');
+                }
+            } catch (err) {
+                if (statusDot) {
+                    statusDot.className = 'status-indicator-dot offline';
+                }
+                if (statusText) {
+                    statusText.textContent = 'D1: Menunggu Koneksi';
+                }
+            }
+        }
+
+        // Fetch students
+        async function fetchStudents(query = '') {
+            if (!tableBody) return;
+            
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="loading-state-cell">
+                        <div class="loading-spinner"></div>
+                        <p>Mengambil data dari Cloudflare D1...</p>
+                    </td>
+                </tr>
+            `;
+
+            try {
+                const url = query ? `/api/students?q=${encodeURIComponent(query)}` : '/api/students';
+                const res = await fetch(url);
+                const result = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(result.error || 'Gagal memuat data');
+                }
+
+                const students = Array.isArray(result) ? result : (result.data || []);
+                renderStudents(students);
+                
+                if (countBadge) {
+                    countBadge.textContent = query 
+                        ? `Ditemukan: ${students.length} data` 
+                        : `Total: ${students.length} Mahasiswa`;
+                }
+
+                if (!query) {
+                    if (navBadge) navBadge.textContent = students.length;
+                    if (mobBadge) mobBadge.textContent = students.length;
+                }
+
+                checkD1Health();
+            } catch (err) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="loading-state-cell" style="color: #ef4444;">
+                            <p>⚠️ Gagal terhubung ke API Cloudflare Workers: ${err.message}</p>
+                            <button type="button" class="btn btn-secondary btn-sm" id="btn-retry-fetch" style="margin-top: 12px;">Coba Lagi</button>
+                        </td>
+                    </tr>
+                `;
+                const retryBtn = document.getElementById('btn-retry-fetch');
+                if (retryBtn) retryBtn.addEventListener('click', () => fetchStudents(query));
+                if (countBadge) countBadge.textContent = 'Koneksi error';
+            }
+        }
+
+        // Render table
+        function renderStudents(students) {
+            if (!students || students.length === 0) {
+                tableBody.innerHTML = '';
+                if (emptyState) emptyState.style.display = 'block';
+                return;
+            }
+
+            if (emptyState) emptyState.style.display = 'none';
+
+            tableBody.innerHTML = students.map((s) => {
+                const initials = s.name ? s.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase() : 'M';
+
+                return `
+                    <tr data-student-id="${s.id}">
+                        <td style="color: var(--text-tertiary); font-family: var(--font-mono);">${s.id}</td>
+                        <td>
+                            <div class="student-meta-cell">
+                                <div class="student-avatar">${initials}</div>
+                                <span class="student-name-text">${escapeHtml(s.name)}</span>
+                            </div>
+                        </td>
+                        <td><span class="student-major-badge">${escapeHtml(s.class_name)}</span></td>
+                        <td class="text-right">
+                            <div class="crud-action-buttons">
+                                <button type="button" class="btn-action btn-action-edit" data-edit-id="${s.id}" title="Edit Data">Edit</button>
+                                <button type="button" class="btn-action btn-action-delete" data-delete-id="${s.id}" data-name="${escapeHtml(s.name)}" data-class="${escapeHtml(s.class_name)}" title="Hapus Data">Hapus</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            // Bind Edit and Delete clicks
+            tableBody.querySelectorAll('[data-edit-id]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.getAttribute('data-edit-id');
+                    const student = students.find(item => String(item.id) === String(id));
+                    if (student) openEditModal(student);
+                });
+            });
+
+            tableBody.querySelectorAll('[data-delete-id]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.getAttribute('data-delete-id');
+                    const name = btn.getAttribute('data-name');
+                    const className = btn.getAttribute('data-class');
+                    openDeleteModal(id, name, className);
+                });
+            });
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        // Open Add Modal
+        function openAddModal() {
+            clearErrors();
+            studentIdField.value = '';
+            nameInput.value = '';
+            classNameInput.value = '';
+            modalTitle.textContent = 'Tambah Mahasiswa Baru';
+            modalSubmitText.textContent = 'Simpan Data';
+            studentModal.classList.add('active');
+            studentModal.setAttribute('aria-hidden', 'false');
+            nameInput.focus();
+        }
+
+        // Open Edit Modal
+        function openEditModal(student) {
+            clearErrors();
+            studentIdField.value = student.id;
+            nameInput.value = student.name || '';
+            classNameInput.value = student.class_name || '';
+            modalTitle.textContent = 'Edit Data Mahasiswa';
+            modalSubmitText.textContent = 'Simpan Perubahan';
+            studentModal.classList.add('active');
+            studentModal.setAttribute('aria-hidden', 'false');
+            nameInput.focus();
+        }
+
+        function closeStudentModal() {
+            studentModal.classList.remove('active');
+            studentModal.setAttribute('aria-hidden', 'true');
+            clearErrors();
+        }
+
+        function clearErrors() {
+            if (errorName) errorName.textContent = '';
+            if (errorClassName) errorClassName.textContent = '';
+        }
+
+        // Open & Close Delete Modal
+        function openDeleteModal(id, name, className) {
+            pendingDeleteId = id;
+            if (deleteStudentName) deleteStudentName.textContent = name;
+            if (deleteStudentClass) deleteStudentClass.textContent = `Kelas: ${className}`;
+            deleteModal.classList.add('active');
+            deleteModal.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeDeleteModal() {
+            deleteModal.classList.remove('active');
+            deleteModal.setAttribute('aria-hidden', 'true');
+            pendingDeleteId = null;
+        }
+
+        // Form Submit (Add / Edit)
+        if (modalForm) {
+            modalForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                clearErrors();
+
+                const id = studentIdField.value.trim();
+                const name = nameInput.value.trim();
+                const className = classNameInput.value.trim();
+
+                let hasError = false;
+                if (!name) {
+                    if (errorName) errorName.textContent = 'Nama lengkap wajib diisi';
+                    hasError = true;
+                }
+                if (!className) {
+                    if (errorClassName) errorClassName.textContent = 'Kelas wajib diisi';
+                    hasError = true;
+                }
+
+                if (hasError) return;
+
+                const payload = { name, class_name: className };
+                const isEdit = Boolean(id);
+                const url = isEdit ? `/api/students/${id}` : '/api/students';
+                const method = isEdit ? 'PUT' : 'POST';
+
+                modalSubmitBtn.disabled = true;
+                modalSubmitText.textContent = 'Menyimpan ke D1...';
+
+                try {
+                    const res = await fetch(url, {
+                        method,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await res.json();
+
+                    if (!res.ok || !result.success) {
+                        const errMsg = result.error || 'Terjadi kesalahan saat menyimpan data';
+                        showToast(`⚠️ ${errMsg}`);
+                        return;
+                    }
+
+                    closeStudentModal();
+                    showToast(isEdit ? `✅ Data ${name} berhasil diperbarui di D1!` : `✅ Mahasiswa ${name} berhasil didaftarkan di D1!`);
+                    fetchStudents(searchInput ? searchInput.value.trim() : '');
+                } catch (err) {
+                    showToast(`⚠️ Error: ${err.message}`);
+                } finally {
+                    modalSubmitBtn.disabled = false;
+                    modalSubmitText.textContent = isEdit ? 'Simpan Perubahan' : 'Simpan Data';
+                }
+            });
+        }
+
+        // Delete Confirm
+        if (deleteConfirmBtn) {
+            deleteConfirmBtn.addEventListener('click', async () => {
+                if (!pendingDeleteId) return;
+
+                deleteConfirmBtn.disabled = true;
+                deleteConfirmBtn.textContent = 'Menghapus...';
+
+                try {
+                    const res = await fetch(`/api/students/${pendingDeleteId}`, {
+                        method: 'DELETE'
+                    });
+                    const result = await res.json();
+
+                    if (!res.ok || !result.success) {
+                        throw new Error(result.error || 'Gagal menghapus');
+                    }
+
+                    closeDeleteModal();
+                    showToast('🗑️ Data mahasiswa berhasil dihapus dari Cloudflare D1!');
+                    fetchStudents(searchInput ? searchInput.value.trim() : '');
+                } catch (err) {
+                    showToast(`⚠️ Gagal menghapus: ${err.message}`);
+                } finally {
+                    deleteConfirmBtn.disabled = false;
+                    deleteConfirmBtn.textContent = 'Hapus Permanen';
+                }
+            });
+        }
+
+        // Seed initial data
+        async function seedDatabase() {
+            try {
+                showToast('⏳ Menginisialisasi data default ke Cloudflare D1...');
+                const res = await fetch('/api/init-db', { method: 'POST' });
+                const result = await res.json();
+
+                if (!res.ok || !result.success) {
+                    throw new Error(result.message || 'Gagal seed data');
+                }
+
+                showToast('✨ Database D1 berhasil diinisialisasi dengan data mahasiswa!');
+                fetchStudents();
+            } catch (err) {
+                showToast(`⚠️ Inisialisasi gagal: ${err.message}`);
+            }
+        }
+
+        // Search events
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const val = e.target.value;
+                if (searchClear) searchClear.style.display = val ? 'block' : 'none';
+
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    fetchStudents(val.trim());
+                }, 300);
+            });
+        }
+
+        if (searchClear) {
+            searchClear.addEventListener('click', () => {
+                searchInput.value = '';
+                searchClear.style.display = 'none';
+                fetchStudents();
+                searchInput.focus();
+            });
+        }
+
+        // Bind buttons
+        if (openAddBtn) openAddBtn.addEventListener('click', openAddModal);
+        if (emptyAddBtn) emptyAddBtn.addEventListener('click', openAddModal);
+        if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeStudentModal);
+        if (modalCancelBtn) modalCancelBtn.addEventListener('click', closeStudentModal);
+        if (deleteModalClose) deleteModalClose.addEventListener('click', closeDeleteModal);
+        if (deleteCancelBtn) deleteCancelBtn.addEventListener('click', closeDeleteModal);
+        if (seedBtn) seedBtn.addEventListener('click', seedDatabase);
+        if (emptySeedBtn) emptySeedBtn.addEventListener('click', seedDatabase);
+
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+                refreshBtn.style.transform = 'rotate(360deg)';
+                refreshBtn.style.transition = 'transform 0.5s ease';
+                fetchStudents(searchInput ? searchInput.value.trim() : '');
+                setTimeout(() => {
+                    refreshBtn.style.transform = '';
+                    refreshBtn.style.transition = '';
+                }, 500);
+            });
+        }
+
+        // Backdrop click to close modals
+        if (studentModal) {
+            studentModal.addEventListener('click', (e) => {
+                if (e.target === studentModal) closeStudentModal();
+            });
+        }
+        if (deleteModal) {
+            deleteModal.addEventListener('click', (e) => {
+                if (e.target === deleteModal) closeDeleteModal();
+            });
+        }
+
+        // Initial fetch
+        fetchStudents();
+    }
+
+    /* --------------------------------------------------------------------------
        17. INITIALIZE ALL MODULES ON DOM READY
        -------------------------------------------------------------------------- */
     document.addEventListener('DOMContentLoaded', () => {
@@ -1050,6 +1452,7 @@
         initContactForm();
         initMobileMenu();
         initAuxButtons();
+        initStudentCrud();
     });
 
 })();

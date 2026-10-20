@@ -1,0 +1,36 @@
+### Environment Variables
+@baseUrl = https://paas-express-worker.pandjirizki029.workers.dev
+# @baseUrl = http://localhost:8787
+
+### 1. Healthcheck Database & Worker Status
+GET {{baseUrl}}/api/health
+
+### 2. Get All Students
+GET {{baseUrl}}/api/students
+
+### 3. Search Students (Filter query)
+GET {{baseUrl}}/api/students?q=Radeya
+
+### 4. Get Student by ID
+GET {{baseUrl}}/api/students/1
+
+### 5. Create Student (POST)
+POST {{baseUrl}}/api/students
+Content-Type: application/json
+
+{
+  "name": "Radeya Alea Akbar",
+  "class_name": "Sija"
+}
+
+### 6. Update Student (PUT)
+PUT {{baseUrl}}/api/students/1
+Content-Type: application/json
+
+{
+  "name": "Radeya Alea Akbar, S.Kom.",
+  "class_name": "Sija"
+}
+
+### 7. Delete Student (DELETE)
+DELETE {{baseUrl}}/api/students/1
