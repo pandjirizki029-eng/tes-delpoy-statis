@@ -11,7 +11,8 @@
     "migrate:remote": "wrangler d1 migrations apply DB --remote"
   },
   "dependencies": {
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "jose": "^6.2.10"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261013.1",

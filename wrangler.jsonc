@@ -8,7 +8,7 @@
   ],
   "assets": {
     "directory": "./public",
-    "run_worker_first": ["/api/*", "/hello/*"]
+    "run_worker_first": ["/api/*"]
   },
   "d1_databases": [
     {
@@ -16,5 +16,18 @@
       "database_name": "paas-students-db",
       "database_id": "23bcee61-d962-4ecc-885d-ef722c17cb5c"
     }
-  ]
+  ],
+  "ratelimits": [
+    {
+      "name": "LOGIN_RATE_LIMITER",
+      "namespace_id": "82611002",
+      "simple": {
+        "limit": 5,
+        "period": 60
+      }
+    }
+  ],
+  "secrets": {
+    "required": ["JWT_SECRET"]
+  }
 }

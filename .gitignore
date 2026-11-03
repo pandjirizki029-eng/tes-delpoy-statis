@@ -16,3 +16,9 @@ yarn-error.log*
 # OS Files
 .DS_Store
 Thumbs.db
+
+.dev.vars
+.dev.vars.*
+.env
+.env.*
+scripts/seed-demo-users.sql

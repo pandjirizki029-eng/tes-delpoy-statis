@@ -1,311 +1,184 @@
-import { httpServerHandler } from "cloudflare:node";
+import express, {
+  type NextFunction,
+  type Request,
+  type Response
+} from "express";
 import { env } from "cloudflare:workers";
-import express, { Request, Response, NextFunction } from "express";
-
-interface Student {
-  id?: number;
-  name: string;
-  class_name: string;
-}
-
-interface EnvWithDB {
-  DB: D1Database;
-  ASSETS?: Fetcher;
-}
+import { httpServerHandler } from "cloudflare:node";
+import authRouter from "./routes/auth";
+import { requireAuth } from "./middleware/auth";
+import { allowRoles } from "./middleware/authorize";
+import { validId, validateStudentInput } from "./lib/validation";
 
 const app = express();
 
-// Parse JSON request body
-app.use(express.json());
+app.disable("x-powered-by");
+app.use(express.json({ limit: "10kb" }));
 
-// CORS & Request Logger Middleware
-app.use((req: Request, res: Response, next: NextFunction) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-
-  if (req.method === "OPTIONS") {
-    res.sendStatus(204);
-    return;
-  }
-  next();
+app.get("/api/health", (_req, res) => {
+  res.json({ status: "ok", service: "student-management-api" });
 });
 
-// Helper function to safely get D1 database binding
-function getDB(): D1Database {
-  const db = (env as unknown as EnvWithDB)?.DB;
-  if (!db) {
-    throw new Error(
-      "D1 Database binding 'DB' is not configured or not accessible in current environment."
-    );
-  }
-  return db;
-}
+app.use("/api/auth", authRouter);
 
-// Ensure students table exists helper
-async function ensureTableExists(db: D1Database) {
-  await db
-    .prepare(
-      `CREATE TABLE IF NOT EXISTS students (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        class_name TEXT NOT NULL,
-        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-      )`
-    )
-    .run();
-}
-
-// 1. Healthcheck & DB Status
-app.get("/api/health", async (req: Request, res: Response) => {
+// READ ALL: viewer, editor, admin
+app.get("/api/students", requireAuth, async (_req, res) => {
   try {
-    const db = getDB();
-    await ensureTableExists(db);
-    const countResult = await db.prepare("SELECT COUNT(*) as total FROM students").first<{ total: number }>();
-    res.json({
-      status: "ok",
-      timestamp: new Date().toISOString(),
-      service: "PaaS Express Worker",
-      database: "Cloudflare D1 (paas-students-db)",
-      studentCount: countResult?.total ?? 0,
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      status: "error",
-      message: error?.message || "Failed to connect to D1 database",
-    });
+    const { results } = await env.DB.prepare(
+      "SELECT id, name, class_name, created_at FROM students ORDER BY id DESC"
+    ).all();
+
+    return res.json({ data: results });
+  } catch {
+    console.error("GET students failed");
+    return res.status(500).json({ error: "Database error" });
   }
 });
 
-// 2. READ: Get all students (Returns array with ONLY id, name, class_name)
-app.get("/api/students", async (req: Request, res: Response) => {
-  try {
-    const db = getDB();
-    await ensureTableExists(db);
-    const search = req.query.q as string | undefined;
+// READ ONE: viewer, editor, admin
+app.get("/api/students/:id", requireAuth, async (req, res) => {
+  const id = validId(req.params.id);
 
-    let query: string;
-    let stmt;
-
-    if (search && search.trim()) {
-      const term = `%${search.trim()}%`;
-      query = `SELECT id, name, class_name FROM students WHERE name LIKE ? OR class_name LIKE ? ORDER BY id ASC`;
-      stmt = db.prepare(query).bind(term, term);
-    } else {
-      query = `SELECT id, name, class_name FROM students ORDER BY id ASC`;
-      stmt = db.prepare(query);
-    }
-
-    const { results } = await stmt.all<Student>();
-    res.json(results);
-  } catch (error: any) {
-    res.status(500).json({
-      error: error?.message || "Error fetching students from D1",
-    });
+  if (!id) {
+    return res.status(400).json({ error: "Invalid student ID" });
   }
-});
 
-// 3. READ: Get student by ID (Returns object with ONLY id, name, class_name)
-app.get("/api/students/:id", async (req: Request, res: Response) => {
   try {
-    const db = getDB();
-    const id = parseInt(String(req.params.id), 10);
-
-    if (isNaN(id)) {
-      res.status(400).json({ error: "Invalid student ID parameter" });
-      return;
-    }
-
-    const student = await db
-      .prepare("SELECT id, name, class_name FROM students WHERE id = ?")
-      .bind(id)
-      .first<Student>();
+    const student = await env.DB.prepare(
+      "SELECT id, name, class_name, created_at FROM students WHERE id = ?"
+    ).bind(id).first();
 
     if (!student) {
-      res.status(404).json({ error: `Student with ID ${id} not found` });
-      return;
+      return res.status(404).json({ error: "Student not found" });
     }
 
-    res.json(student);
-  } catch (error: any) {
-    res.status(500).json({
-      error: error?.message || "Error retrieving student",
-    });
+    return res.json({ data: student });
+  } catch {
+    console.error("GET student failed");
+    return res.status(500).json({ error: "Database error" });
   }
 });
 
-// 4. CREATE: Add a new student (Returns ONLY id, name, class_name)
-app.post("/api/students", async (req: Request, res: Response) => {
-  try {
-    const db = getDB();
-    await ensureTableExists(db);
-    const { name, class_name } = req.body;
+// CREATE: editor, admin
+app.post(
+  "/api/students",
+  requireAuth,
+  allowRoles("editor", "admin"),
+  async (req, res) => {
+    const input = validateStudentInput(req.body);
 
-    if (!name || !class_name) {
-      res.status(400).json({
-        error: "Both 'name' and 'class_name' are required",
+    if (!input) {
+      return res.status(400).json({
+        error: "name must be 2-80 characters and class_name 2-30 characters"
       });
-      return;
     }
 
-    const result = await db
-      .prepare(
-        `INSERT INTO students (name, class_name) VALUES (?, ?)`
-      )
-      .bind(name.trim(), class_name.trim())
-      .run();
+    try {
+      const result = await env.DB.prepare(
+        "INSERT INTO students (name, class_name) VALUES (?, ?)"
+      ).bind(input.name, input.class_name).run();
 
-    const insertedId = result.meta.last_row_id;
-    const newStudent = await db
-      .prepare("SELECT id, name, class_name FROM students WHERE id = ?")
-      .bind(insertedId)
-      .first<Student>();
-
-    res.status(201).json(newStudent);
-  } catch (error: any) {
-    res.status(500).json({
-      error: error?.message || "Failed to create student",
-    });
+      return res.status(201).json({
+        id: result.meta.last_row_id,
+        name: input.name,
+        class_name: input.class_name
+      });
+    } catch {
+      console.error("CREATE student failed");
+      return res.status(500).json({ error: "Database error" });
+    }
   }
-});
+);
 
-// 5. UPDATE: Update an existing student (Returns ONLY id, name, class_name)
-app.put("/api/students/:id", async (req: Request, res: Response) => {
-  try {
-    const db = getDB();
-    const id = parseInt(String(req.params.id), 10);
+// UPDATE: editor, admin
+app.put(
+  "/api/students/:id",
+  requireAuth,
+  allowRoles("editor", "admin"),
+  async (req, res) => {
+    const id = validId(req.params.id);
+    const input = validateStudentInput(req.body);
 
-    if (isNaN(id)) {
-      res.status(400).json({ error: "Invalid student ID parameter" });
-      return;
+    if (!id) {
+      return res.status(400).json({ error: "Invalid student ID" });
     }
 
-    const { name, class_name } = req.body;
-
-    const existing = await db
-      .prepare("SELECT id, name, class_name FROM students WHERE id = ?")
-      .bind(id)
-      .first<Student>();
-
-    if (!existing) {
-      res.status(404).json({ error: `Student with ID ${id} not found` });
-      return;
+    if (!input) {
+      return res.status(400).json({
+        error: "name must be 2-80 characters and class_name 2-30 characters"
+      });
     }
 
-    const updatedName = name !== undefined ? name.trim() : existing.name;
-    const updatedClassName = class_name !== undefined ? class_name.trim() : existing.class_name;
+    try {
+      const result = await env.DB.prepare(
+        "UPDATE students SET name = ?, class_name = ? WHERE id = ?"
+      ).bind(input.name, input.class_name, id).run();
 
-    await db
-      .prepare(
-        `UPDATE students SET name = ?, class_name = ? WHERE id = ?`
-      )
-      .bind(updatedName, updatedClassName, id)
-      .run();
+      if (result.meta.changes === 0) {
+        return res.status(404).json({ error: "Student not found" });
+      }
 
-    const updatedStudent = await db
-      .prepare("SELECT id, name, class_name FROM students WHERE id = ?")
-      .bind(id)
-      .first<Student>();
-
-    res.json(updatedStudent);
-  } catch (error: any) {
-    res.status(500).json({
-      error: error?.message || "Failed to update student",
-    });
+      return res.json({
+        id,
+        name: input.name,
+        class_name: input.class_name,
+        updated: true
+      });
+    } catch {
+      console.error("UPDATE student failed");
+      return res.status(500).json({ error: "Database error" });
+    }
   }
-});
+);
 
-// 6. DELETE: Remove a student (Returns ONLY id, name, class_name)
-app.delete("/api/students/:id", async (req: Request, res: Response) => {
-  try {
-    const db = getDB();
-    const id = parseInt(String(req.params.id), 10);
+// DELETE: admin only
+app.delete(
+  "/api/students/:id",
+  requireAuth,
+  allowRoles("admin"),
+  async (req, res) => {
+    const id = validId(req.params.id);
 
-    if (isNaN(id)) {
-      res.status(400).json({ error: "Invalid student ID parameter" });
-      return;
+    if (!id) {
+      return res.status(400).json({ error: "Invalid student ID" });
     }
 
-    const existing = await db
-      .prepare("SELECT id, name, class_name FROM students WHERE id = ?")
-      .bind(id)
-      .first<Student>();
+    try {
+      const result = await env.DB.prepare(
+        "DELETE FROM students WHERE id = ?"
+      ).bind(id).run();
 
-    if (!existing) {
-      res.status(404).json({ error: `Student with ID ${id} not found` });
-      return;
+      if (result.meta.changes === 0) {
+        return res.status(404).json({ error: "Student not found" });
+      }
+
+      return res.json({ deleted: true, id });
+    } catch {
+      console.error("DELETE student failed");
+      return res.status(500).json({ error: "Database error" });
     }
-
-    await db.prepare("DELETE FROM students WHERE id = ?").bind(id).run();
-
-    res.json(existing);
-  } catch (error: any) {
-    res.status(500).json({
-      error: error?.message || "Failed to delete student",
-    });
   }
+);
+
+app.use("/api", (_req, res) => {
+  res.status(404).json({ error: "API route not found" });
 });
 
-// ==========================================
-// Rute Minggu 5 (Node.js + Express on Workers)
-// ==========================================
+// JSON/body parser errors
+app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  const details = error as { type?: string };
 
-// 1. Route Greeting Dasar (Bab 4 Minggu 5)
-app.get("/", (req: Request, res: Response) => {
-  res.json({
-    message: "Hello Express on Cloudflare Workers!",
-  });
+  if (details?.type === "entity.too.large") {
+    return res.status(413).json({ error: "Request body is too large" });
+  }
+
+  if (error instanceof SyntaxError) {
+    return res.status(400).json({ error: "Invalid JSON body" });
+  }
+
+  console.error("Unhandled API error");
+  return res.status(500).json({ error: "Internal server error" });
 });
 
-// 2. Route Status API (Bab 4 Minggu 5)
-app.get("/api/status", (req: Request, res: Response) => {
-  res.json({
-    status: "ok",
-    subject: "PaaS",
-    week: 5,
-    platform: "Cloudflare Workers",
-  });
-});
-
-// 3. Route Info Redeploy (Bab 9 Challenge Redeploy Minggu 5)
-app.get("/api/info", (req: Request, res: Response) => {
-  res.json({
-    framework: "Express",
-    runtime: "Cloudflare Workers",
-    course: "Platform as a Service",
-  });
-});
-
-// 4. Route Log & Observability (Bab 10 Minggu 5)
-app.get("/api/log-test", (req: Request, res: Response) => {
-  console.log("Endpoint /api/log-test dipanggil");
-  res.json({
-    logged: true,
-  });
-});
-
-// 5. Route Challenge Pengayaan Minggu 5 (Bab 12)
-app.get("/api/time", (req: Request, res: Response) => {
-  res.json({
-    time: new Date().toISOString(),
-    timezone: "UTC",
-  });
-});
-
-app.get("/hello/:name", (req: Request, res: Response) => {
-  res.json({
-    message: `Hello, ${req.params.name}! Welcome to Express on Cloudflare Workers.`,
-  });
-});
-
-// 404 Handler for undefined API routes
-app.use("/api/*", (req: Request, res: Response) => {
-  res.status(404).json({
-    error: `API route not found: ${req.method} ${req.originalUrl}`,
-  });
-});
-
-// Bind server port & export Workers entrypoint
 app.listen(3000);
-
 export default httpServerHandler({ port: 3000 });
